@@ -36,8 +36,7 @@
 (setq package-archives '(("gnu" . "http://elpa.gnu.org/packages/")
                          ("melpa" . "http://melpa.org/packages/")
                          ("melpa-stable" . "http://stable.melpa.org/packages/")
-                         ("org" . "http://orgmode.org/elpa/")
-                         ("marmalade" . "http://marmalade-repo.org/packages/")))
+                         ("org" . "http://orgmode.org/elpa/")))
 
 ;; use-package & bind-key
 
@@ -215,7 +214,8 @@
   :config
   (progn
     (setq recentf-save-file (concat joe-emacs-temporal-directory "recentf")
-          recentf-max-saved-items 100)
+          recentf-max-saved-items 100
+          recentf-exclude '("COMMIT_MSG" "COMMIT_EDITMSG"))
     (recentf-mode t)))
 
 ;; Keep session between emacs runs (Desktop)
@@ -742,7 +742,7 @@
         :ensure t
         :defer 1
         :config
-        (set-face-attribute 'aw-leading-char-face nil :foreground "deep sky blue" :weight 'bold :height 3.0)
+        (set-face-attribute 'aw-leading-char-face nil :foreground "deep sky blue" :weight 'bold :height 2.0)
         (set-face-attribute 'aw-mode-line-face nil :inherit 'mode-line-buffer-id :foreground "lawn green")
         (setq aw-keys   '(?a ?s ?d ?f ?j ?k ?l)
               aw-dispatch-always t
@@ -942,6 +942,14 @@
 (use-package csv-mode
   :ensure t
   :mode "\\.csv\\'")
+
+;; define-word
+
+;; [[https://github.com/abo-abo/define-word][define-word]] is a GNU Emacs package that lets you see the definition of a word or
+;; a phrase at point, without having to switch to a browser.
+
+(use-package define-word
+  :ensure t)
 
 ;; diff-hl
 
@@ -1226,6 +1234,9 @@
       git-rebase-mode)
     "List of modes that should start up in Evil Emacs state."
     :type '(symbol))
+
+    ;; better indentation
+    (define-key evil-insert-state-map (kbd "RET") 'newline-and-indent)
 
     ;; esc quits almost everywhere, Gotten from ;;
     ;; http://stackoverflow.com/questions/8483182/emacs-evil-mode-best-practice,;;
@@ -1973,12 +1984,14 @@
   [_w_] eww      [_g_] google          [_f_] elfeed            [_i_] imgur
   [_u_] url      [_m_] google maps     [_t_] twitter
    ^ ^           [_s_] surfraw         [_x_] stack overflow
+   ^ ^           [_d_] wordnik
 --------------------------------------------------------------------------------
       "
       ("f" elfeed)
       ("g" google-this)
       ("i" imgur-post)
       ("m" google-maps)
+      ("d" define-word-at-point)
       ("s" helm-surfraw)
       ("t" twit)
       ("w" eww)
@@ -3522,7 +3535,9 @@
      (interactive)
      (swiper)
      (add-to-list 'regexp-search-ring (ivy--regex ivy-text)))
-  (ivy-mode t))
+  (ivy-mode t)
+  (use-package counsel
+    :ensure t))
 
 ;; twittering-mode
 
@@ -3685,12 +3700,18 @@
 ;; [[https://github.com/capitaomorte/yasnippet][YASnippet]] is a template system for Emacs. It allows you to type an
 ;; abbreviation and automatically expand it into function templates.
 
+;; [[https://github.com/emacs-helm/helm-c-yasnippet][helm-c-yasnippet]] is a helm source to display available yasnippets for the
+;; current mode.
+
 (use-package yasnippet
   :ensure t
   :defer 5
   :diminish yas-minor-mode
   :config
-  (yas-global-mode))
+  (yas-global-mode)
+  (use-package helm-c-yasnippet
+    :ensure t
+    :ensure helm))
 
 ;; Disable it in ansi-term
 
